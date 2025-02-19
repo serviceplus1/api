@@ -1,0 +1,42 @@
+{
+    "name": "diego/framew",
+    "description": "Framew",
+    "authors": [
+        {
+            "name": "Diego Ferraz",
+            "email": "diegoaferraz@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\" : "app/"
+        },
+        "files": [
+            "config/app.php",
+            "lib/helpers.php",
+            "routes/routes.php"
+        ]
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "psr/http-message": "^1.0",
+        "phpmailer/phpmailer": "^6.1",
+        "guzzlehttp/guzzle": "~6.0",
+        "league/plates": "v4.0.0-alpha",
+        "coffeecode/router": "^1.0",
+        "respect/validation": "^1.1",
+        "monolog/monolog": "^2.0",
+        "smottt/wideimage": "^1.1",
+        "setasign/fpdf": "^1.8",
+        "dompdf/dompdf": "^0.8.6",
+        "doctrine/collections": "^1.6",
+        "nesbot/carbon": "^2.41",
+        "ddeboer/imap": "^1.10",
+        "php-imap/php-imap": "^4.1",
+        "firebase/php-jwt": "^5.2"
+    },
+    "require-dev": {
+        "matthiasmullie/minify": "^1.3"
+    }
+}
