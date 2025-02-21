@@ -134,6 +134,7 @@ class ChamadoController extends Controller
             ->join('chamados_status AS s', 'ch.status_id', 's.status_id')
             ->select($fields)
             ->where('ch.chamado_id', $id)
+            ->where('ch.lixeira', 0)
             ->first();
 
         if (!$chamado)
@@ -288,6 +289,7 @@ class ChamadoController extends Controller
             ->join('chamados_tipos as ct', 'ch.tipo_id', 'ct.tipo_id')
             ->join('chamados_status as cs', 'ch.status_id', 'cs.status_id')
             ->select($fields)
+            ->where('ch.lixeira', 0)
             ->where('ch.chamado_id', 0, ">");
 
         if ($data->has("chamado_id")) {
@@ -583,6 +585,10 @@ class ChamadoController extends Controller
 
         $chamado = Chamado::findById($id);
 
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
+
         $this->checkTecnico($chamado, "iniciar");
 
         // if ($chamado->status_id!=1)
@@ -644,6 +650,10 @@ class ChamadoController extends Controller
         $id = $data->id("chamado_id");
 
         $chamado = Chamado::findById($id);
+
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
 
         $this->checkTecnico($chamado, "checar");
 
@@ -722,6 +732,10 @@ class ChamadoController extends Controller
         $id = $data->id("chamado_id");
 
         $chamado = Chamado::findById($id);
+
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
 
         $this->checkTecnico($chamado);
 
@@ -804,6 +818,10 @@ class ChamadoController extends Controller
         $id = $data->id("chamado_id");
 
         $chamado = Chamado::findById($id);
+
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
 
         // Checando APP do Técnico
         if ($this->guard=="tecnicos") {
@@ -960,6 +978,10 @@ class ChamadoController extends Controller
 
         $chamado = Chamado::findById($id);
 
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
+
         if ($this->guard=="tecnicos") {
 
             $this->checkTecnico($chamado, "cancelar");
@@ -1028,6 +1050,10 @@ class ChamadoController extends Controller
 
         $chamado = Chamado::findById($id);
 
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
+
         $this->checkTecnico($chamado, "finalizar");
 
         $this->checkStatus($chamado, [3,4]);
@@ -1093,6 +1119,10 @@ class ChamadoController extends Controller
             // Inserir tarefa na tabela de task_topdesk. Roda no cronjob
             DB::table("task_topdesk")->insert(["codigo"=>$chamado->topdesk, "acao"=>"encerrar", "mensagem"=>$chamado->mensagem_solucao]);
         }
+
+        // Setar qual o técnico que está finalizando e quando
+        $up["finalizado_por"] = 'tecnico';
+        $up["finalizado_id"] = $this->auth->auth()->uid;
 
         // Atualizar
         try {
@@ -1174,7 +1204,6 @@ class ChamadoController extends Controller
         return response_json(["success" => 'Chamado finalizado com sucesso']);
     }
 
-
     public function update($request)
     {
 
@@ -1184,6 +1213,12 @@ class ChamadoController extends Controller
         $data->json(false);
 
         $id = $data->id("chamado_id");
+
+        $chamado = Chamado::findById($id);
+
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
 
         $permitidos = [
             "chamado_id",
@@ -1218,8 +1253,6 @@ class ChamadoController extends Controller
         $suprimentos = $data->has("suprimentos") ? $data->suprimentos : false;
 
         $data->remove(["chamado_id", "pecas", "servicos", "suprimentos"]);
-
-        $chamado = Chamado::findById($id);
 
         $this->checkTecnico($chamado, "finalizar");
 
@@ -1343,7 +1376,6 @@ class ChamadoController extends Controller
 
     }
 
-
     public function delete()
     {
 
@@ -1356,9 +1388,16 @@ class ChamadoController extends Controller
 
         $chamado = Chamado::findById($id);
 
+        $chamado = Chamado::findById($id);
+
         if (!$chamado)
             return response_json(["error"=>"Chamado não encontrado"], 400);
             // return response_json(["message"=>"Chamado não encontrado"], 400);
+
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
+
 
         if ($this->guard=="tecnicos") {
 
@@ -1408,6 +1447,10 @@ class ChamadoController extends Controller
 
         if (!$chamado)
             return response_json(["error"=>"Chamado não encontrado"], 400);
+
+        if ($chamado->lixeira == 1) {
+            return response_json(['error'=>'Chamado não encontrado'], 400);
+        }
 
         if ($this->guard=="tecnicos") {
 
